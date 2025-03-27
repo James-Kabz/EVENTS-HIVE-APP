@@ -6,17 +6,22 @@ const prisma = new PrismaClient()
 async function main() {
   // Create default permissions
   const permissions = [
-    { name: "users:read", description: "Can view users" },
-    { name: "users:create", description: "Can create users" },
-    { name: "users:update", description: "Can update users" },
-    { name: "users:delete", description: "Can delete users" },
+    { name: "attendees:read", description: "Can view attendees" },
+    { name: "attendees:create", description: "Can create attendees" },
+    { name: "attendees:update", description: "Can update attendees" },
+    { name: "attendees:delete", description: "Can delete attendees" },
     { name: "roles:read", description: "Can view roles" },
     { name: "roles:create", description: "Can create roles" },
     { name: "roles:update", description: "Can update roles" },
     { name: "roles:delete", description: "Can delete roles" },
     { name: "dashboard:access", description: "Can access dashboard" },
+    { name: "admin:access", description: "Can access admin panel" },
     { name: "settings:access", description: "Can access settings" },
     { name: "analytics:access", description: "Can access analytics" },
+    { name: "events:read", description: "Can access events" },
+    { name: "events:edit", description: "Can edit events" },
+    { name: "events:create", description: "Can create events" },
+    { name: "events:delete", description: "Can delete events" },
   ]
 
   // Create permissions
@@ -40,36 +45,35 @@ async function main() {
     },
   })
 
-  const userRole = await prisma.role.upsert({
-    where: { name: "user" },
+  const attendeeRole = await prisma.role.upsert({
+    where: { name: "attendee" },
     update: {},
     create: {
-      name: "user",
-      description: "Regular user with limited access",
+      name: "attendee",
+      description: "Regular attendee with limited access",
     },
   })
 
-  const moderatorRole = await prisma.role.upsert({
-    where: { name: "moderator" },
+  const organiserRole = await prisma.role.upsert({
+    where: { name: "organiser" },
     update: {},
     create: {
-      name: "moderator",
-      description: "Moderator with elevated access",
+      name: "organiser",
+      description: "Organiser with events access",
     },
   })
 
-  // Add the guest role to the seed file after the moderator role
+  // Add the guest role to the seed file after the Organiser role
   const guestRole = await prisma.role.upsert({
     where: { name: "guest" },
     update: {},
     create: {
       name: "guest",
-      description: "Default role for new users with limited access",
+      description: "Default role for new attendees with limited access",
     },
   })
 
   console.log("Created guest role")
-
   console.log("Created default roles")
 
   // Assign permissions to roles
@@ -96,9 +100,9 @@ async function main() {
     }
   }
 
-  // User gets basic permissions
-  const userPermissions = ["dashboard:access", "settings:access"]
-  for (const permissionName of userPermissions) {
+  // attendee gets basic permissions
+  const attendeePermissions = ["dashboard:access", "settings:access", "events:read"]
+  for (const permissionName of attendeePermissions) {
     const permissionRecord = await prisma.permission.findUnique({
       where: { name: permissionName },
     })
@@ -107,22 +111,32 @@ async function main() {
       await prisma.rolePermission.upsert({
         where: {
           roleId_permissionId: {
-            roleId: userRole.id,
+            roleId: attendeeRole.id,
             permissionId: permissionRecord.id,
           },
         },
         update: {},
         create: {
-          roleId: userRole.id,
+          roleId: attendeeRole.id,
           permissionId: permissionRecord.id,
         },
       })
     }
   }
 
-  // Moderator gets elevated permissions
-  const moderatorPermissions = ["dashboard:access", "settings:access", "analytics:access", "users:read", "roles:read"]
-  for (const permissionName of moderatorPermissions) {
+  // Organiser gets events permissions
+  const organiserPermissions = [
+    "dashboard:access",
+    "settings:access",
+    "analytics:access",
+    "attendees:read",
+    "roles:read",
+    "events:read",
+    "events:edit",
+    "events:create",
+    "events:delete",
+  ]
+  for (const permissionName of organiserPermissions) {
     const permissionRecord = await prisma.permission.findUnique({
       where: { name: permissionName },
     })
@@ -131,13 +145,13 @@ async function main() {
       await prisma.rolePermission.upsert({
         where: {
           roleId_permissionId: {
-            roleId: moderatorRole.id,
+            roleId: organiserRole.id,
             permissionId: permissionRecord.id,
           },
         },
         update: {},
         create: {
-          roleId: moderatorRole.id,
+          roleId: organiserRole.id,
           permissionId: permissionRecord.id,
         },
       })

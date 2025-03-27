@@ -6,7 +6,7 @@ CREATE TABLE `User` (
     `emailVerified` DATETIME(3) NULL,
     `password` VARCHAR(191) NULL,
     `image` VARCHAR(191) NULL,
-    `roleId` VARCHAR(191) NULL,
+    `roleId` INTEGER NULL,
     `resetToken` VARCHAR(191) NULL,
     `resetTokenExpiry` DATETIME(3) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -59,7 +59,7 @@ CREATE TABLE `VerificationToken` (
 
 -- CreateTable
 CREATE TABLE `Role` (
-    `id` VARCHAR(191) NOT NULL,
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -71,7 +71,7 @@ CREATE TABLE `Role` (
 
 -- CreateTable
 CREATE TABLE `Permission` (
-    `id` VARCHAR(191) NOT NULL,
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -84,8 +84,8 @@ CREATE TABLE `Permission` (
 -- CreateTable
 CREATE TABLE `RolePermission` (
     `id` VARCHAR(191) NOT NULL,
-    `roleId` VARCHAR(191) NOT NULL,
-    `permissionId` VARCHAR(191) NOT NULL,
+    `roleId` INTEGER NOT NULL,
+    `permissionId` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     UNIQUE INDEX `RolePermission_roleId_permissionId_key`(`roleId`, `permissionId`),

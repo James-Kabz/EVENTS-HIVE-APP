@@ -3,27 +3,39 @@ import { PrismaClient } from "@prisma/client"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth/auth"
 import { checkPermission } from "@/lib/auth/permissions"
+import { NextApiRequest, NextApiResponse } from "next"
 
 const prisma = new PrismaClient()
 
 // Get a specific permission by ID
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const session = await getServerSession(authOptions)
+    // Check the request method
+    if (req.method !== 'GET') {
+      return res.status(405).json({ message: "Method Not Allowed" })
+    }
 
+    // Get the permission ID from the query
+    const { id } = req.query
+
+    // Validate that id is provided
+    if (!id || typeof id !== 'number') {
+      return res.status(400).json({ message: "Invalid Permission ID" })
+    }
+
+    // Check user session
+    const session = await getServerSession(req, res, authOptions)
     if (!session?.user?.id) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+      return res.status(401).json({ message: "Unauthorized" })
     }
 
+    // Check permission
     const hasViewPermission = await checkPermission("roles:read")
-
     if (!hasViewPermission) {
-      return NextResponse.json({ message: "Forbidden" }, { status: 403 })
+      return res.status(403).json({ message: "Forbidden" })
     }
 
-    // Await the params object before accessing its properties
-    const { id } = await params
-
+    // Fetch the permission
     const permission = await prisma.permission.findUnique({
       where: { id },
       include: {
@@ -35,19 +47,22 @@ export async function GET(request: Request, { params }: { params: { id: string }
       },
     })
 
+    // Check if permission exists
     if (!permission) {
-      return NextResponse.json({ message: "Permission not found" }, { status: 404 })
+      return res.status(404).json({ message: "Permission not found" })
     }
 
-    return NextResponse.json(permission)
+    // Return the permission
+    return res.status(200).json(permission)
+
   } catch (error) {
     console.error("Error fetching permission:", error)
-    return NextResponse.json({ message: "Something went wrong" }, { status: 500 })
+    return res.status(500).json({ message: "Something went wrong" })
   }
 }
 
 // Update a permission
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: { id: number } }) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -119,7 +134,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 }
 
 // Delete a permission
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: { id: number } }) {
   try {
     const session = await getServerSession(authOptions)
 

@@ -7,7 +7,7 @@ import { checkPermission } from "@/lib/auth/permissions"
 const prisma = new PrismaClient()
 
 // Get a specific role by ID
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: { id : number } }) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -52,7 +52,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 }
 
 // Update a role
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: { id : number } }) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -151,7 +151,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 }
 
 // Delete a role
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: { id : number } }) {
   try {
     const session = await getServerSession(authOptions)
 
