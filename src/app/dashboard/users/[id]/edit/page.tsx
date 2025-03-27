@@ -19,8 +19,7 @@ interface EditUserPageProps {
 }
 
 export default async function EditUserPage({ params }: EditUserPageProps) {
-  const { id } = await params
-  const user = await getUserById(id)
+  const user = await getUserById(params.id)
 
   return (
     <div className="space-y-6">
@@ -70,7 +69,7 @@ export default async function EditUserPage({ params }: EditUserPageProps) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <EditUserForm userId={id} />
+            <EditUserForm userId={params.id} />
           </CardContent>
         </Card>
       </PermissionGate>

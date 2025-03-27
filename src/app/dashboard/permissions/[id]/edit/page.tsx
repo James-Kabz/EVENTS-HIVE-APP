@@ -18,8 +18,7 @@ interface EditPermissionPageProps {
 }
 
 export default async function EditPermissionPage({ params }: EditPermissionPageProps) {
-  const { id } = await params
-  const permission = await getPermissionById(id)
+  const permission = await getPermissionById(params.id)
 
   return (
     <div className="space-y-6">
@@ -58,7 +57,7 @@ export default async function EditPermissionPage({ params }: EditPermissionPageP
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <EditPermissionForm permissionId={id} />
+          <EditPermissionForm permissionId={params.id} />
         </CardContent>
       </Card>
     </div>

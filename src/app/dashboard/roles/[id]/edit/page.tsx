@@ -18,8 +18,7 @@ interface EditRolePageProps {
 }
 
 export default async function EditRolePage({ params }: EditRolePageProps) {
-  const { id } = await params
-  const role = await getRoleById(id)
+  const role = await getRoleById(params.id)
   
   return (
     <div className="space-y-6">
@@ -64,7 +63,7 @@ export default async function EditRolePage({ params }: EditRolePageProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <EditRoleForm roleId={id} />
+          <EditRoleForm roleId={params.id} />
         </CardContent>
       </Card>
     </div>
