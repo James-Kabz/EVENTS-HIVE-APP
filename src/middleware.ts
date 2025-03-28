@@ -17,9 +17,9 @@ export async function middleware(request: NextRequest) {
   }
 
   // Redirect unauthenticated users to login
-  if (!isAuthenticated && isProtectedRoute) {
-    return NextResponse.redirect(new URL("/unauthorized", request.url))
-  }
+  // if (!isAuthenticated && isProtectedRoute) {
+  //   return NextResponse.redirect(new URL("/unauthorized", request.url))
+  // }
 
   // Handle forbidden access (example: checking role-based access)
   // This is just a placeholder - you would implement your actual permission logic
