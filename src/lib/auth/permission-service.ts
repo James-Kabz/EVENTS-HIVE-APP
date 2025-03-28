@@ -1,17 +1,11 @@
 import { PrismaClient } from "@prisma/client"
 
-
 const prisma = new PrismaClient()
 
-export async function getPermissionById(id : string) {
+export async function getPermissionById(id: string) {
   try {
-
-    const permissionId = parseInt(id, 10);
-
-    if (isNaN(permissionId)) {
-      console.error("Invalid role ID:", id);
-      return null; // Return null if ID is not a valid number
-    }
+    // Ensure id is properly awaited if it's a promise
+    const permissionId = await id
 
     const permission = await prisma.permission.findUnique({
       where: { id: permissionId },

@@ -22,9 +22,9 @@ export async function GET(req: Request) {
     }
 
     const { pathname } = new URL(req.url);
-    const permissionId = parseInt(pathname.split("/").pop() || "", 10);
+    const permissionId = pathname.split("/").pop();
 
-    if (isNaN(permissionId)) {
+    if (!permissionId) {
       return NextResponse.json({ error: "Invalid permission ID" }, { status: 400 });
     }
 
@@ -65,9 +65,9 @@ export async function PUT(request: Request) {
     }
 
     const { pathname } = new URL(request.url);
-    const permissionId = parseInt(pathname.split("/").pop() || "", 10);
+    const permissionId = pathname.split("/").pop();
 
-    if (isNaN(permissionId)) {
+    if (!permissionId) {
       return NextResponse.json({ message: "Invalid permission ID" }, { status: 400 });
     }
 
@@ -141,9 +141,9 @@ export async function DELETE(request: Request) {
     }
 
     const { pathname } = new URL(request.url);
-    const permissionId = parseInt(pathname.split("/").pop() || "", 10);
+    const permissionId = pathname.split("/").pop();
 
-    if (isNaN(permissionId)) {
+    if (!permissionId) {
       return NextResponse.json({ message: "Invalid permission ID" }, { status: 400 });
     }
 

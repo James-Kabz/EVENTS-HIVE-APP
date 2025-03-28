@@ -22,13 +22,13 @@ export async function GET(request: Request) {
     }
 
     const { pathname } = new URL(request.url);
-    const roleId = parseInt(pathname.split("/").pop() || "", 10);
+    const id = pathname.split("/").pop();
 
-    if (isNaN(roleId)) {
+    if (!id) {
       return NextResponse.json({ message: "Invalid role ID" }, { status: 400 });
     }
     const role = await prisma.role.findUnique({
-      where: { id : roleId },
+      where: { id },
       include: {
         permissions: {
           include: {
@@ -68,9 +68,9 @@ export async function PUT(request: Request) {
     }
 
     const { pathname } = new URL(request.url);
-    const id = parseInt(pathname.split("/").pop() || "", 10);
+    const id = pathname.split("/").pop();
 
-    if (isNaN(id)) {
+    if (!id) {
       return NextResponse.json({ message: "Invalid role ID" }, { status: 400 });
     }
 
@@ -130,9 +130,9 @@ export async function DELETE(request: Request) {
     }
 
     const { pathname } = new URL(request.url);
-    const id = parseInt(pathname.split("/").pop() || "", 10);
+    const id = pathname.split("/").pop();
 
-    if (isNaN(id)) {
+    if (!id) {
       return NextResponse.json({ message: "Invalid role ID" }, { status: 400 });
     }
 

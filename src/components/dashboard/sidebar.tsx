@@ -29,8 +29,8 @@ interface RouteItem {
   permission?: string
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function DashboardSidebar({ user }: Props) {
-  console.log(user);
   const pathname = usePathname()
   // Use the hook to get all user permissions at once
   const { permissions, isLoading } = useUserPermissions()

@@ -5,15 +5,8 @@ const prisma = new PrismaClient()
 
 export async function getRoleById(id: string) {
   try {
-    const roleId = parseInt(id, 10); // Convert string ID to a number
-
-    if (isNaN(roleId)) {
-      console.error("Invalid role ID:", id);
-      return null; // Return null if ID is not a valid number
-    }
-
     const role = await prisma.role.findUnique({
-      where: { id: roleId }, // Use the converted number ID
+      where: { id },
       include: {
         permissions: {
           include: {

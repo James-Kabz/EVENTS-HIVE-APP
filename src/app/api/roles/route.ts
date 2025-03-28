@@ -93,7 +93,7 @@ export async function POST(request: Request) {
         name,
         description,
         permissions: {
-          create: await Promise.all(permissions.map(async (permissionId: number) => {
+          create: await Promise.all(permissions.map(async (permissionId: string) => {
             const permission = await prisma.permission.findUnique({
               where: { id: permissionId },
               select: { id: true, name: true },
