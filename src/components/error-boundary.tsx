@@ -42,7 +42,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <div className="space-y-4 max-w-md">
             <h2 className="text-xl font-semibold">Something went wrong</h2>
             <p className="text-muted-foreground">
-              {process.env.NODE_ENV === "development" && this.state.error
+              {process.env.NODE_ENV === "production" && this.state.error
                 ? `Error: ${this.state.error.message}`
                 : "An error occurred in this component."}
             </p>

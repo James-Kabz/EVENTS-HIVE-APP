@@ -24,11 +24,11 @@ export default function GlobalError({
             <h1 className="text-6xl font-bold">500</h1>
             <h2 className="text-2xl font-semibold">Application Error</h2>
             <p className="text-muted-foreground">
-              {process.env.NODE_ENV === "development"
+              {process.env.NODE_ENV === "production"
                 ? `Error: ${error.message}`
                 : "A critical error occurred. Our team has been notified."}
             </p>
-            {process.env.NODE_ENV === "development" && error.digest && (
+            {process.env.NODE_ENV === "production" && error.digest && (
               <p className="text-xs text-muted-foreground">Error ID: {error.digest}</p>
             )}
             <Button onClick={reset}>
