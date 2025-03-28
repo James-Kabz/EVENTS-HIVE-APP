@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Loader2, Plus, Pencil } from "lucide-react"
 import { PermissionGate } from "@/components/auth/permission-gate"
 import Link from "next/link"
+import { EditPermissionModal } from "@/components/dashboard/permissions/edit-permission-modal"
+import { useRouter } from "next/navigation"
 
 interface Permission {
   id: string
@@ -19,23 +21,38 @@ interface Permission {
 export function PermissionsTable() {
   const [permissions, setPermissions] = useState<Permission[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedPermissionId, setSelectedPermissionId] = useState<string | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
-    async function fetchPermissions() {
-      try {
-        const response = await fetch("/api/permissions")
-        if (!response.ok) throw new Error("Failed to fetch permissions")
-        const data = await response.json()
-        setPermissions(data.permissions)
-      } catch (error) {
-        console.error("Error fetching permissions:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
     fetchPermissions()
   }, [])
+
+  async function fetchPermissions() {
+    try {
+      const response = await fetch("/api/permissions")
+      if (!response.ok) throw new Error("Failed to fetch permissions")
+      const data = await response.json()
+      setPermissions(data.permissions)
+    } catch (error) {
+      console.error("Error fetching permissions:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleEditPermission = (id: string) => {
+    setSelectedPermissionId(id)
+    setIsEditModalOpen(true)
+  }
+
+  const handleModalClose = () => {
+    setIsEditModalOpen(false)
+    setSelectedPermissionId(null)
+    fetchPermissions()
+    router.refresh()
+  }
 
   if (loading) {
     return (
@@ -87,11 +104,9 @@ export function PermissionsTable() {
                   <TableCell>{permission._count.roles}</TableCell>
                   <TableCell className="text-right">
                     <PermissionGate permission="roles:update">
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/dashboard/permissions/${permission.id}/edit`}>
-                          <Pencil className="mr-2 h-4 w-4" />
-                          Edit
-                        </Link>
+                      <Button variant="ghost" size="sm" onClick={() => handleEditPermission(permission.id)}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Edit
                       </Button>
                     </PermissionGate>
                   </TableCell>
@@ -101,6 +116,10 @@ export function PermissionsTable() {
           </TableBody>
         </Table>
       </div>
+
+      {selectedPermissionId && (
+        <EditPermissionModal isOpen={isEditModalOpen} onClose={handleModalClose} permissionId={selectedPermissionId} />
+      )}
     </div>
   )
 }

@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
-    if (!(await checkPermission("users:read"))) {
+    if (!(await checkPermission("attendees:read"))) {
       return NextResponse.json({ message: "Forbidden" }, { status: 403 });
     }
 
@@ -46,7 +46,7 @@ export async function PUT(request: Request) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
-    if (!(await checkPermission("users:update"))) {
+    if (!(await checkPermission("attendees:update"))) {
       return NextResponse.json({ message: "Forbidden" }, { status: 403 });
     }
 

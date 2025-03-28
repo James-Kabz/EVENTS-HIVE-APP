@@ -67,7 +67,7 @@ export async function POST(request: Request) {
     if (!/^[a-z]+:[a-z]+$/.test(name)) {
       return NextResponse.json(
         {
-          message: "Permission name must be in format 'category:action' (e.g., users:read)",
+          message: "Permission name must be in format 'category:action' (e.g., attendees:read)",
         },
         { status: 400 },
       )

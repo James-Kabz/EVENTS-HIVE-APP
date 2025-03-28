@@ -11,7 +11,7 @@ export default function UsersPage() {
       </div>
 
       <PermissionGate
-        permission="users:read"
+        permission="attendees:read"
         fallback={
           <Card>
             <CardHeader>

@@ -164,7 +164,7 @@ export async function DELETE(request: Request) {
     }
 
     // Don't allow deleting core permissions
-    const corePermissions = ["dashboard:access", "users:read", "roles:read"];
+    const corePermissions = ["dashboard:access", "attendees:read", "roles:read"];
     if (corePermissions.includes(permission.name)) {
       return NextResponse.json(
         {

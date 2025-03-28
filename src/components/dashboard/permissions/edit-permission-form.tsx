@@ -33,7 +33,7 @@ const permissionFormSchema = z.object({
       message: "Permission name must not be longer than 50 characters.",
     })
     .refine((value) => /^[a-z]+:[a-z]+$/.test(value), {
-      message: "Permission name must be in format 'category:action' (e.g., users:read).",
+      message: "Permission name must be in format 'category:action' (e.g., attendees:read).",
     }),
   description: z
     .string()
@@ -47,9 +47,10 @@ type PermissionFormValues = z.infer<typeof permissionFormSchema>
 
 interface EditPermissionFormProps {
   permissionId: string
+  onSuccess?: () => void
 }
 
-export function EditPermissionForm({ permissionId }: EditPermissionFormProps) {
+export function EditPermissionForm({ permissionId, onSuccess }: EditPermissionFormProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -110,8 +111,13 @@ export function EditPermissionForm({ permissionId }: EditPermissionFormProps) {
 
       toast.success(`The permission "${data.name}" has been updated successfully.`)
 
-      router.push("/dashboard/permissions")
-      router.refresh()
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess()
+      } else {
+        router.push("/dashboard/permissions")
+        router.refresh()
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to update permission")
     } finally {
@@ -134,8 +140,13 @@ export function EditPermissionForm({ permissionId }: EditPermissionFormProps) {
 
       toast.success("The permission has been deleted successfully.")
 
-      router.push("/dashboard/permissions")
-      router.refresh()
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess()
+      } else {
+        router.push("/dashboard/permissions")
+        router.refresh()
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to update role")
     } finally {
@@ -167,7 +178,7 @@ export function EditPermissionForm({ permissionId }: EditPermissionFormProps) {
                       <Input {...field} />
                     </FormControl>
                     <FormDescription>
-                      The permission name in the format <code>category:action</code> (e.g., users:read)
+                      The permission name in the format <code>category:action</code> (e.g., attendees:read)
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

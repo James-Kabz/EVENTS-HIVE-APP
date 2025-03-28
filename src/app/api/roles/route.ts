@@ -93,10 +93,24 @@ export async function POST(request: Request) {
         name,
         description,
         permissions: {
-          create: permissions.map((permissionId: string) => ({
-            permission: {
-              connect: { id: permissionId },
-            },
+          create: await Promise.all(permissions.map(async (permissionId: number) => {
+            const permission = await prisma.permission.findUnique({
+              where: { id: permissionId },
+              select: { id: true, name: true },
+            });
+    
+            if (!permission) {
+              throw new Error(`Permission with ID ${permissionId} not found`);
+            }
+    
+            return {
+              permission: {
+                connect: {
+                  id: permission.id,
+                  name: permission.name,
+                },
+              },
+            };
           })),
         },
       },

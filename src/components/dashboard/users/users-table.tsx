@@ -5,11 +5,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { Loader2, Pencil, Search } from "lucide-react"
 import { PermissionGate } from "@/components/auth/permission-gate"
-import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { formatDistanceToNow } from "date-fns"
+import { EditUserModal } from "@/components/dashboard/users/edit-user-modal"
+import { useRouter } from "next/navigation"
 
 interface User {
   id: string
@@ -27,23 +28,26 @@ export function UsersTable() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
-    async function fetchUsers() {
-      try {
-        const response = await fetch("/api/users")
-        if (!response.ok) throw new Error("Failed to fetch users")
-        const data = await response.json()
-        setUsers(data.users)
-      } catch (error) {
-        console.error("Error fetching users:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
     fetchUsers()
   }, [])
+
+  async function fetchUsers() {
+    try {
+      const response = await fetch("/api/users")
+      if (!response.ok) throw new Error("Failed to fetch users")
+      const data = await response.json()
+      setUsers(data.users)
+    } catch (error) {
+      console.error("Error fetching users:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const filteredUsers = searchQuery
     ? users.filter(
@@ -53,6 +57,18 @@ export function UsersTable() {
           user.role?.name.toLowerCase().includes(searchQuery.toLowerCase()),
       )
     : users
+
+  const handleEditUser = (id: string) => {
+    setSelectedUserId(id)
+    setIsEditModalOpen(true)
+  }
+
+  const handleModalClose = () => {
+    setIsEditModalOpen(false)
+    setSelectedUserId(null)
+    fetchUsers()
+    router.refresh()
+  }
 
   if (loading) {
     return (
@@ -132,12 +148,10 @@ export function UsersTable() {
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <PermissionGate permission="users:update">
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/dashboard/users/${user.id}/edit`}>
-                          <Pencil className="mr-2 h-4 w-4" />
-                          Edit
-                        </Link>
+                    <PermissionGate permission="attendees:update">
+                      <Button variant="ghost" size="sm" onClick={() => handleEditUser(user.id)}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Edit
                       </Button>
                     </PermissionGate>
                   </TableCell>
@@ -147,6 +161,8 @@ export function UsersTable() {
           </TableBody>
         </Table>
       </div>
+
+      {selectedUserId && <EditUserModal isOpen={isEditModalOpen} onClose={handleModalClose} userId={selectedUserId} />}
     </div>
   )
 }

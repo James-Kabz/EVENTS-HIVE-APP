@@ -25,7 +25,7 @@ const permissionFormSchema = z.object({
       message: "Permission name must not be longer than 50 characters.",
     })
     .refine((value) => /^[a-z]+:[a-z]+$/.test(value), {
-      message: "Permission name must be in format 'category:action' (e.g., users:read).",
+      message: "Permission name must be in format 'category:action' (e.g., attendees:read).",
     }),
   description: z
     .string()
@@ -198,7 +198,7 @@ export function AddPermissionForm() {
                   <Input {...field} />
                 </FormControl>
                 <FormDescription>
-                  The permission name in the format <code>category:action</code> (e.g., users:read)
+                  The permission name in the format <code>category:action</code> (e.g., attendees:read)
                 </FormDescription>
                 <FormMessage />
               </FormItem>

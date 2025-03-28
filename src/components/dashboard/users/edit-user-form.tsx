@@ -49,9 +49,10 @@ interface Role {
 
 interface EditUserFormProps {
   userId: string
+  onSuccess?: () => void
 }
 
-export function EditUserForm({ userId }: EditUserFormProps) {
+export function EditUserForm({ userId, onSuccess }: EditUserFormProps) {
   const router = useRouter()
   const { data: session } = useSession()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -149,8 +150,13 @@ export function EditUserForm({ userId }: EditUserFormProps) {
 
       toast.success(`The user "${data.name}" has been updated successfully.`)
 
-      router.push("/dashboard/users")
-      router.refresh()
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess()
+      } else {
+        router.push("/dashboard/users")
+        router.refresh()
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to update user")
     } finally {
@@ -173,8 +179,13 @@ export function EditUserForm({ userId }: EditUserFormProps) {
 
       toast.success("The user has been deleted successfully")
 
-      router.push("/dashboard/users")
-      router.refresh()
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess()
+      } else {
+        router.push("/dashboard/users")
+        router.refresh()
+      }
     } catch (error) {
       toast.error( error instanceof Error ? error.message : "Failed to delete user")
     } finally {

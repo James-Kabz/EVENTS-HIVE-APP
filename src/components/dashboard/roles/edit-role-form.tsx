@@ -51,9 +51,10 @@ type RoleFormValues = z.infer<typeof roleFormSchema>
 
 interface EditRoleFormProps {
   roleId: string
+  onSuccess?: () => void
 }
 
-export function EditRoleForm({ roleId }: EditRoleFormProps) {
+export function EditRoleForm({ roleId, onSuccess }: EditRoleFormProps) {
   const router = useRouter()
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -125,8 +126,13 @@ export function EditRoleForm({ roleId }: EditRoleFormProps) {
 
       toast.success(`The role "${data.name}" has been updated successfully.`)
 
-      router.push("/dashboard/permissions")
-      router.refresh()
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess()
+      } else {
+        router.push("/dashboard/roles")
+        router.refresh()
+      }
     } catch (error) {
       toast.error( error instanceof Error ? error.message : "Failed to update role")
     } finally {
@@ -149,8 +155,13 @@ export function EditRoleForm({ roleId }: EditRoleFormProps) {
 
       toast.success("The role has been deleted successfully.")
 
-      router.push("/dashboard/permissions")
-      router.refresh()
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess()
+      } else {
+        router.push("/dashboard/roles")
+        router.refresh()
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to delete role")
     } finally {

@@ -62,7 +62,7 @@ export function DashboardSidebar({ user }: Props) {
       title: "Users",
       href: "/dashboard/users",
       icon: Users,
-      permission: "users:read",
+      permission: "attendees:read",
     },
     {
       title: "Roles & Permissions",

@@ -4,9 +4,11 @@ import { useState, useEffect } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Loader2, Pencil, Plus } from "lucide-react"
+import { Loader2, Plus, Pencil } from "lucide-react"
 import { PermissionGate } from "@/components/auth/permission-gate"
 import Link from "next/link"
+import { EditRoleModal } from "@/components/dashboard/roles/edit-role-modal"
+import { useRouter } from "next/navigation"
 
 interface Role {
   id: string
@@ -26,23 +28,38 @@ interface Role {
 export function RolesTable() {
   const [roles, setRoles] = useState<Role[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
-    async function fetchRoles() {
-      try {
-        const response = await fetch("/api/roles")
-        if (!response.ok) throw new Error("Failed to fetch roles")
-        const data = await response.json()
-        setRoles(data.roles)
-      } catch (error) {
-        console.error("Error fetching roles:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
     fetchRoles()
   }, [])
+
+  async function fetchRoles() {
+    try {
+      const response = await fetch("/api/roles")
+      if (!response.ok) throw new Error("Failed to fetch roles")
+      const data = await response.json()
+      setRoles(data.roles)
+    } catch (error) {
+      console.error("Error fetching roles:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleEditRole = (id: string) => {
+    setSelectedRoleId(id)
+    setIsEditModalOpen(true)
+  }
+
+  const handleModalClose = () => {
+    setIsEditModalOpen(false)
+    setSelectedRoleId(null)
+    fetchRoles()
+    router.refresh()
+  }
 
   if (loading) {
     return (
@@ -62,8 +79,8 @@ export function RolesTable() {
         <PermissionGate permission="roles:create">
           <Button size="sm" asChild>
             <Link href="/dashboard/roles/add">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Role
+              <Plus className="mr-2 h-4 w-4" />
+              Add Role
             </Link>
           </Button>
         </PermissionGate>
@@ -107,11 +124,9 @@ export function RolesTable() {
                   <TableCell>{role._count.users}</TableCell>
                   <TableCell className="text-right">
                     <PermissionGate permission="roles:update">
-                    <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/dashboard/roles/${role.id}/edit`}>
-                          <Pencil className="mr-2 h-4 w-4" />
-                          Edit
-                        </Link>
+                      <Button variant="ghost" size="sm" onClick={() => handleEditRole(role.id)}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Edit
                       </Button>
                     </PermissionGate>
                   </TableCell>
@@ -121,6 +136,8 @@ export function RolesTable() {
           </TableBody>
         </Table>
       </div>
+
+      {selectedRoleId && <EditRoleModal isOpen={isEditModalOpen} onClose={handleModalClose} roleId={selectedRoleId} />}
     </div>
   )
 }

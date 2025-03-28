@@ -15,7 +15,7 @@ export async function GET() {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
-    const hasViewPermission = await checkPermission("users:read")
+    const hasViewPermission = await checkPermission("attendees:read")
 
     if (!hasViewPermission) {
       return NextResponse.json({ message: "Forbidden" }, { status: 403 })
