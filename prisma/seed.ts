@@ -22,6 +22,12 @@ async function main() {
     { name: "events:edit", description: "Can edit events" },
     { name: "events:create", description: "Can create events" },
     { name: "events:delete", description: "Can delete events" },
+    { name: "bookings:read", description: "Can view bookings" },
+    { name: "bookings:create", description: "Can create bookings" },
+    { name: "bookings:manage", description: "Can manage all bookings" },
+    { name: "users:read", description: "Can view users" },
+    { name: "users:update", description: "Can update users" },
+    { name: "users:delete", description: "Can delete users" },
   ]
 
   // Create permissions
@@ -101,7 +107,7 @@ async function main() {
   }
 
   // attendee gets basic permissions
-  const attendeePermissions = ["dashboard:access", "settings:access", "events:read"]
+  const attendeePermissions = ["dashboard:access", "settings:access", "events:read", "bookings:create", "bookings:read"]
   for (const permissionName of attendeePermissions) {
     const permissionRecord = await prisma.permission.findUnique({
       where: { name: permissionName },
@@ -135,6 +141,9 @@ async function main() {
     "events:edit",
     "events:create",
     "events:delete",
+    "bookings:read",
+    "bookings:create",
+    "bookings:manage",
   ]
   for (const permissionName of organiserPermissions) {
     const permissionRecord = await prisma.permission.findUnique({
@@ -159,7 +168,7 @@ async function main() {
   }
 
   // Add basic permissions for guest role
-  const guestPermissions = ["dashboard:access"]
+  const guestPermissions = ["dashboard:access", "events:read", "bookings:create", "bookings:read"]
   for (const permissionName of guestPermissions) {
     const permissionRecord = await prisma.permission.findUnique({
       where: { name: permissionName },
