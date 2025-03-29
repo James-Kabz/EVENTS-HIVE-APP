@@ -7,12 +7,12 @@ import { checkPermission } from "@/lib/auth/permissions"
 const prisma = new PrismaClient()
 
 // Get a specific event by ID
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: { eventId: string } }) {
   try {
-    const { id } = params
+    const { eventId } = params
 
     const event = await prisma.event.findUnique({
-      where: { id },
+      where: { id: eventId },
       include: {
         creator: {
           select: {
@@ -43,7 +43,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 }
 
 // Update an event
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: { eventId: string } }) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -57,12 +57,12 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ message: "Forbidden" }, { status: 403 })
     }
 
-    const { id } = params
+    const { eventId } = params
     const data = await request.json()
 
     // Check if event exists
     const event = await prisma.event.findUnique({
-      where: { id },
+      where: { id: eventId },
       select: { creatorId: true },
     })
 
@@ -80,7 +80,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     // Update the event
     const updatedEvent = await prisma.event.update({
-      where: { id },
+      where: { id: eventId },
       data: {
         name: data.name,
         description: data.description,
@@ -106,7 +106,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 }
 
 // Delete an event
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: { eventId: string } }) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -120,11 +120,11 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       return NextResponse.json({ message: "Forbidden" }, { status: 403 })
     }
 
-    const { id } = params
+    const { eventId } = params
 
     // Check if event exists
     const event = await prisma.event.findUnique({
-      where: { id },
+      where: { id: eventId },
       select: {
         creatorId: true,
         _count: {
@@ -159,7 +159,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
     // Delete the event and related ticket types
     await prisma.event.delete({
-      where: { id },
+      where: { id: eventId },
     })
 
     return NextResponse.json({ message: "Event deleted successfully" })
