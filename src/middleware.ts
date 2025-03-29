@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
     const userRole = token.role as string 
 
     // setting allowed roles
-    const allowedRoles = ["admin", "guest","user","moderator"];
+    const allowedRoles = ["admin", "guest","attendee","moderator"];
     if (!allowedRoles.includes(userRole)) {
       return NextResponse.redirect(new URL("/forbidden", request.url))
     }

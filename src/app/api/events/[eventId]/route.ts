@@ -7,10 +7,15 @@ import { checkPermission } from "@/lib/auth/permissions"
 const prisma = new PrismaClient()
 
 // Get a specific event by ID
-export async function GET(request: Request, { params }: { params: { eventId: string } }) {
+export async function GET(req: Request) {
   try {
-    const { eventId } = params
 
+    const { pathname } = new URL(req.url);
+    const eventId = pathname.split("/").pop();
+
+    if (!eventId) {
+      return NextResponse.json({ error: "Invalid event ID" }, { status: 400 });
+    }
     const event = await prisma.event.findUnique({
       where: { id: eventId },
       include: {
@@ -43,7 +48,7 @@ export async function GET(request: Request, { params }: { params: { eventId: str
 }
 
 // Update an event
-export async function PUT(request: Request, { params }: { params: { eventId: string } }) {
+export async function PUT(request: Request) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -57,7 +62,12 @@ export async function PUT(request: Request, { params }: { params: { eventId: str
       return NextResponse.json({ message: "Forbidden" }, { status: 403 })
     }
 
-    const { eventId } = params
+    const { pathname } = new URL(request.url);
+    const eventId = pathname.split("/").pop();
+
+    if (!eventId) {
+      return NextResponse.json({ error: "Invalid event ID" }, { status: 400 });
+    }
     const data = await request.json()
 
     // Check if event exists
@@ -106,7 +116,7 @@ export async function PUT(request: Request, { params }: { params: { eventId: str
 }
 
 // Delete an event
-export async function DELETE(request: Request, { params }: { params: { eventId: string } }) {
+export async function DELETE(request: Request) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -120,7 +130,12 @@ export async function DELETE(request: Request, { params }: { params: { eventId: 
       return NextResponse.json({ message: "Forbidden" }, { status: 403 })
     }
 
-    const { eventId } = params
+    const { pathname } = new URL(request.url);
+    const eventId = pathname.split("/").pop();
+
+    if (!eventId) {
+      return NextResponse.json({ error: "Invalid event ID" }, { status: 400 });
+    }
 
     // Check if event exists
     const event = await prisma.event.findUnique({

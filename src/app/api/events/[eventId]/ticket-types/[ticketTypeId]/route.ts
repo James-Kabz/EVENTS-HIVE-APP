@@ -7,10 +7,14 @@ import { checkPermission } from "@/lib/auth/permissions"
 const prisma = new PrismaClient()
 
 // Get a specific ticket type
-export async function GET(request: Request, { params }: { params: { eventId: string; id: string } }) {
+export async function GET(req: Request) {
   try {
-    const { id } = params
+    const { pathname } = new URL(req.url);
+    const id = pathname.split("/").pop();
 
+    if (!id) {
+      return NextResponse.json({ error: "Invalid event ID" }, { status: 400 });
+    }
     const ticketType = await prisma.ticketType.findUnique({
       where: { id },
       include: {
@@ -36,7 +40,7 @@ export async function GET(request: Request, { params }: { params: { eventId: str
 }
 
 // Update a ticket type
-export async function PUT(request: Request, { params }: { params: { eventId: string; id: string } }) {
+export async function PUT(request: Request,) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -50,7 +54,14 @@ export async function PUT(request: Request, { params }: { params: { eventId: str
       return NextResponse.json({ message: "Forbidden" }, { status: 403 })
     }
 
-    const { eventId, id } = params
+    const { pathname } = new URL(request.url);
+    const id = pathname.split("/").pop();
+    const eventId = pathname.split("/").pop();
+
+    if (!id) {
+      return NextResponse.json({ error: "Invalid event ID" }, { status: 400 });
+    }
+    // const { eventId, id } = params
     const data = await request.json()
 
     // Check if ticket type exists
@@ -110,7 +121,7 @@ export async function PUT(request: Request, { params }: { params: { eventId: str
 }
 
 // Delete a ticket type
-export async function DELETE(request: Request, { params }: { params: { eventId: string; id: string } }) {
+export async function DELETE(request: Request) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -124,7 +135,12 @@ export async function DELETE(request: Request, { params }: { params: { eventId: 
       return NextResponse.json({ message: "Forbidden" }, { status: 403 })
     }
 
-    const { id } = params
+    const { pathname } = new URL(request.url);
+    const id = pathname.split("/").pop();
+
+    if (!id) {
+      return NextResponse.json({ error: "Invalid event ID" }, { status: 400 });
+    }
 
     // Check if ticket type exists
     const ticketType = await prisma.ticketType.findUnique({

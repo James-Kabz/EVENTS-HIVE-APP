@@ -7,9 +7,14 @@ import { checkPermission } from "@/lib/auth/permissions"
 const prisma = new PrismaClient()
 
 // Get all ticket types for an event
-export async function GET(request: Request, { params }: { params: { eventId: string } }) {
+export async function GET(request: Request) {
   try {
-    const { eventId } = params
+    const { pathname } = new URL(request.url);
+    const eventId = pathname.split("/").pop();
+
+    if (!eventId) {
+      return NextResponse.json({ error: "Invalid event ID" }, { status: 400 });
+    }
 
     const ticketTypes = await prisma.ticketType.findMany({
       where: { eventId },
@@ -24,7 +29,7 @@ export async function GET(request: Request, { params }: { params: { eventId: str
 }
 
 // Create a new ticket type for an event
-export async function POST(request: Request, { params }: { params: { eventId: string } }) {
+export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -38,7 +43,13 @@ export async function POST(request: Request, { params }: { params: { eventId: st
       return NextResponse.json({ message: "Forbidden" }, { status: 403 })
     }
 
-    const { eventId } = params
+    const { pathname } = new URL(request.url);
+    const eventId = pathname.split("/").pop();
+
+    if (!eventId) {
+      return NextResponse.json({ error: "Invalid event ID" }, { status: 400 });
+    }
+
     const data = await request.json()
 
     // Check if event exists and user is the creator

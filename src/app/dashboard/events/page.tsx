@@ -9,6 +9,7 @@ import { EventsList } from "@/components/dashboard/events/events-list"
 import { EventFormModal } from "@/components/dashboard/events/event-form-modal"
 import { Plus } from "lucide-react"
 import { useSession } from "next-auth/react"
+import { Event } from "@/types/event"
 
 export default function EventsPage() {
   const { data: session } = useSession()
@@ -17,7 +18,7 @@ export default function EventsPage() {
   const [events, setEvents] = useState([])
   const [myEvents, setMyEvents] = useState([])
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-
+  const userId = session?.user?.id
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -29,7 +30,7 @@ export default function EventsPage() {
 
         // Filter my events
         if (session?.user?.id) {
-          setMyEvents(data.events.filter((event: any) => event.creator.id === session.user.id))
+          setMyEvents(data.events.filter((event: Event) => event.creator.id === userId))
         }
       } catch (error) {
         console.error("Error fetching events:", error)
@@ -39,7 +40,7 @@ export default function EventsPage() {
     }
 
     fetchEvents()
-  }, [session])
+  }, [session,userId])
 
   const refreshEvents = async () => {
     setIsLoading(true)
@@ -52,7 +53,7 @@ export default function EventsPage() {
 
       // Filter my events
       if (session?.user?.id) {
-        setMyEvents(data.events.filter((event: any) => event.creator.id === session.user.id))
+        setMyEvents(data.events.filter((event: Event) => event.creator.id === userId))
       }
     } catch (error) {
       console.error("Error refreshing events:", error)
@@ -126,7 +127,7 @@ export default function EventsPage() {
             </CardHeader>
             <CardContent>
               <EventsList
-                events={events.filter((event: any) => new Date(event.startDate) > new Date())}
+                events={events.filter((event: Event) => new Date(event.startDate) > new Date())}
                 isLoading={isLoading}
                 emptyMessage="No upcoming events found"
                 onEventUpdated={refreshEvents}
