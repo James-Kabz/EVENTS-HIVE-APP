@@ -1,0 +1,17 @@
+name: Enforce Development First
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if not merging from development
+        run: |
+          if [[ ${{ github.event.pull_request.base.ref }} == "main" ]] && [[ ${{ github.event.pull_request.head.ref }} != "development" ]]; then
+            echo "ERROR: You can only merge from 'development' into 'main'."
+            exit 1
+          fi
