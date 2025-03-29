@@ -4,7 +4,7 @@ import type React from "react"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BarChart3, LayoutDashboard, ShieldCheck, UserCheck, Users } from "lucide-react"
+import { BarChart3, Calendar, LayoutDashboard, ShieldCheck, Ticket, UserCheck, Users } from "lucide-react"
 import { Sidebar, SidebarContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
 
 // Import the custom components
@@ -42,6 +42,18 @@ export function DashboardSidebar({ user }: Props) {
       href: "/dashboard",
       icon: LayoutDashboard,
       permission: "dashboard:access", // Basic permission that most roles should have
+    },
+    {
+      title: "Events",
+      href: "/dashboard/events",
+      icon: Calendar,
+      permission: "events:read", // Permission to view events
+    },
+    {
+      title: "My Bookings",
+      href: "/dashboard/bookings",
+      icon: Ticket,
+      permission: "bookings:read", // Permission to view bookings
     },
     {
       title: "Analytics",
