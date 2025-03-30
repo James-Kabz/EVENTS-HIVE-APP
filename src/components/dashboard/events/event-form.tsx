@@ -377,7 +377,7 @@ export function EventForm({ mode, initialData, onSuccess }: EventFormProps) {
                                             <div>
                                                 <h4 className="font-medium">{ticketType.name}</h4>
                                                 <p className="text-sm text-muted-foreground">
-                                                    ${ticketType.price} - {ticketType.quantity} available
+                                                    Kshs {ticketType.price} - {ticketType.quantity} available
                                                 </p>
                                                 {ticketType.description && (
                                                     <p className="text-sm text-muted-foreground mt-1">{ticketType.description}</p>

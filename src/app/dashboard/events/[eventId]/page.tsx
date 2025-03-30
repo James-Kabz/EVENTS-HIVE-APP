@@ -220,7 +220,7 @@ export default function EventDetailsPage() {
                                                     </CardHeader>
                                                     <CardContent className="pb-2">
                                                         <div className="flex justify-between items-center">
-                                                            <div className="text-2xl font-bold">${ticket.price.toFixed(2)}</div>
+                                                            <div className="text-2xl font-bold">Kshs {ticket.price.toFixed(2)}</div>
                                                             <Badge variant={ticket.remaining > 0 ? "outline" : "secondary"}>
                                                                 {ticket.remaining > 0 ? `${ticket.remaining} remaining` : "Sold out"}
                                                             </Badge>
@@ -253,7 +253,7 @@ export default function EventDetailsPage() {
                                         <div key={ticket.id} className="flex justify-between items-center">
                                             <div>
                                                 <p className="font-medium">{ticket.name}</p>
-                                                <p className="text-sm text-muted-foreground">${ticket.price.toFixed(2)}</p>
+                                                <p className="text-sm text-muted-foreground">Kshs {ticket.price.toFixed(2)}</p>
                                             </div>
                                             <Badge variant={ticket.remaining > 0 ? "outline" : "secondary"}>
                                                 {ticket.remaining > 0 ? `${ticket.remaining}/${ticket.quantity}` : "Sold out"}

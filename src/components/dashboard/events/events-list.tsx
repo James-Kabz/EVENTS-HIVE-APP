@@ -120,7 +120,7 @@ export function EventsList({
                 <div className="flex flex-wrap gap-2">
                   {event.ticketTypes.map((type) => (
                     <Badge key={type.id} variant="outline">
-                      {type.name}: ${type.price}
+                      {type.name}: Kshs {type.price}
                     </Badge>
                   ))}
                 </div>
