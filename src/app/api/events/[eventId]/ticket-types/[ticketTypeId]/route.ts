@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
 import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib//auth/auth"
+import { authOptions } from "@/lib/auth/auth"
 import { checkPermission } from "@/lib/auth/permissions"
 
 const prisma = new PrismaClient()
@@ -9,14 +9,17 @@ const prisma = new PrismaClient()
 // Get a specific ticket type
 export async function GET(req: Request) {
   try {
-    const { pathname } = new URL(req.url);
-    const id = pathname.split("/").pop();
+    const { pathname } = new URL(req.url)
+    const segments = pathname.split("/")
+    const ticketTypeId = segments.pop()
+    const eventId = segments[segments.length - 2]
 
-    if (!id) {
-      return NextResponse.json({ error: "Invalid event ID" }, { status: 400 });
+    if (!ticketTypeId || !eventId) {
+      return NextResponse.json({ error: "Invalid IDs" }, { status: 400 })
     }
+
     const ticketType = await prisma.ticketType.findUnique({
-      where: { id },
+      where: { id: ticketTypeId },
       include: {
         event: {
           select: {
@@ -40,8 +43,17 @@ export async function GET(req: Request) {
 }
 
 // Update a ticket type
-export async function PUT(request: Request,) {
+export async function PUT(req: Request) {
   try {
+    const { pathname } = new URL(req.url)
+    const segments = pathname.split("/")
+    const ticketTypeId = segments.pop()
+    const eventId = segments[segments.length - 2]
+
+    if (!ticketTypeId || !eventId) {
+      return NextResponse.json({ error: "Invalid IDs" }, { status: 400 })
+    }
+
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
@@ -54,19 +66,11 @@ export async function PUT(request: Request,) {
       return NextResponse.json({ message: "Forbidden" }, { status: 403 })
     }
 
-    const { pathname } = new URL(request.url);
-    const id = pathname.split("/").pop();
-    const eventId = pathname.split("/").pop();
-
-    if (!id) {
-      return NextResponse.json({ error: "Invalid event ID" }, { status: 400 });
-    }
-    // const { eventId, id } = params
-    const data = await request.json()
+    const data = await req.json()
 
     // Check if ticket type exists
     const ticketType = await prisma.ticketType.findUnique({
-      where: { id ,eventId},
+      where: { id: ticketTypeId },
       include: {
         event: {
           select: {
@@ -98,7 +102,7 @@ export async function PUT(request: Request,) {
 
     // Update the ticket type
     const updatedTicketType = await prisma.ticketType.update({
-      where: { id },
+      where: { id: ticketTypeId },
       data: {
         name: data.name,
         description: data.description,
@@ -121,8 +125,17 @@ export async function PUT(request: Request,) {
 }
 
 // Delete a ticket type
-export async function DELETE(request: Request) {
+export async function DELETE(req: Request) {
   try {
+    const { pathname } = new URL(req.url)
+    const segments = pathname.split("/")
+    const ticketTypeId = segments.pop()
+    const eventId = segments[segments.length - 2]
+
+    if (!ticketTypeId || !eventId) {
+      return NextResponse.json({ error: "Invalid IDs" }, { status: 400 })
+    }
+
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
@@ -135,16 +148,9 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ message: "Forbidden" }, { status: 403 })
     }
 
-    const { pathname } = new URL(request.url);
-    const id = pathname.split("/").pop();
-
-    if (!id) {
-      return NextResponse.json({ error: "Invalid event ID" }, { status: 400 });
-    }
-
     // Check if ticket type exists
     const ticketType = await prisma.ticketType.findUnique({
-      where: { id },
+      where: { id: ticketTypeId },
       include: {
         event: {
           select: {
@@ -188,7 +194,7 @@ export async function DELETE(request: Request) {
 
     // Delete the ticket type
     await prisma.ticketType.delete({
-      where: { id },
+      where: { id: ticketTypeId },
     })
 
     return NextResponse.json({ message: "Ticket type deleted successfully" })

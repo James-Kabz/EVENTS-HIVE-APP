@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { useParams} from "next/navigation"
+import { useParams } from "next/navigation"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -51,37 +51,37 @@ interface Booking {
 }
 
 export default function BookingDetailsPage() {
-  const params = useParams()  
-//   const router = useRouter();
-  const id =params.id
+  const params = useParams()
+  //   const router = useRouter();
+  const id = params.id
   const [booking, setBooking] = useState<Booking | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isCancelling, setIsCancelling] = useState(false)
 
-    const fetchBooking = useCallback(async () => {
-      try {
-        const response = await fetch(`/api/bookings/${id}`)
+  const fetchBooking = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/bookings/${id}`)
 
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error("Booking not found")
-          }
-          throw new Error("Failed to fetch booking")
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error("Booking not found")
         }
-
-        const data = await response.json()
-        setBooking(data)
-      } catch (error) {
-        setError(error instanceof Error ? error.message : "An error occurred")
-      } finally {
-        setIsLoading(false)
+        throw new Error("Failed to fetch booking")
       }
-    }, [id])
 
-    useEffect(() => {
-      fetchBooking()
-    }, [fetchBooking])
+      const data = await response.json()
+      setBooking(data)
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "An error occurred")
+    } finally {
+      setIsLoading(false)
+    }
+  }, [id])
+
+  useEffect(() => {
+    fetchBooking()
+  }, [fetchBooking])
 
   const handleCancelBooking = async () => {
     setIsCancelling(true)
@@ -99,7 +99,7 @@ export default function BookingDetailsPage() {
         throw new Error(error.message || "Failed to cancel booking")
       }
 
-      toast("Booking cancelled",{
+      toast("Booking cancelled", {
         description: "Your booking has been cancelled successfully.",
       })
 
@@ -311,27 +311,30 @@ export default function BookingDetailsPage() {
               <Separator />
 
               <div className="space-y-2">
-                {Object.entries(booking.tickets
-                  .reduce((acc: Record<string, { name: string; price: number; count: number }>, ticket) => {
-                    const key = ticket.ticketType.id
-                    if (!acc[key]) {
-                      acc[key] = {
-                        name: ticket.ticketType.name,
-                        price: ticket.ticketType.price,
-                        count: 0,
+                {Object.values(
+                  booking.tickets.reduce(
+                    (acc: Record<string, { name: string; price: number; count: number }>, ticket) => {
+                      const key = ticket.ticketType.id
+                      if (!acc[key]) {
+                        acc[key] = {
+                          name: ticket.ticketType.name,
+                          price: ticket.ticketType.price,
+                          count: 0,
+                        }
                       }
-                    }
-                    acc[key].count++
-                    return acc
-                  }, {}))
-                  .map(([key, item]) => (
-                    <div key={key} className="flex justify-between text-sm">
-                      <span>
-                        {item.count} x {item.name}
-                      </span>
-                      <span>Kshs {(item.price * item.count).toFixed(2)}</span>
-                    </div>
-                  ))}
+                      acc[key].count++
+                      return acc
+                    },
+                    {},
+                  ),
+                ).map((item, index) => (
+                  <div key={index} className="flex justify-between text-sm">
+                    <span>
+                      {item.count} x {item.name}
+                    </span>
+                    <span>Kshs {(item.price * item.count).toFixed(2)}</span>
+                  </div>
+                ))}
 
                 <Separator />
 

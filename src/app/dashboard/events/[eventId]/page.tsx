@@ -8,12 +8,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2, Calendar, Clock, MapPin, Edit, Ticket, ArrowLeft, Trash } from "lucide-react"
+import { Loader2, Calendar, Clock, MapPin, Edit, Ticket, ArrowLeft, Trash, Plus } from "lucide-react"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
 import { EventFormModal } from "@/components/dashboard/events/event-form-modal"
 import { DeleteEventModal } from "@/components/dashboard/events/delete-event-modal"
 import Image from "next/image"
+import { TicketTypeEditModal } from "@/components/dashboard/events/ticket-type-edit-modal"
+import { TicketTypeCreateModal } from "@/components/dashboard/events/ticket-type-create-modal"
 
 interface TicketType {
     id: string
@@ -55,6 +57,9 @@ export default function EventDetailsPage() {
     const [error, setError] = useState<string | null>(null)
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+    const [isTicketTypeEditModalOpen, setIsTicketTypeEditModalOpen] = useState(false)
+    const [isTicketTypeCreateModalOpen, setIsTicketTypeCreateModalOpen] = useState(false)
+    const [selectedTicketType, setSelectedTicketType] = useState<TicketType | null>(null)
 
     const fetchEvent = useCallback(async () => {
         try {
@@ -69,20 +74,33 @@ export default function EventDetailsPage() {
             }
 
             const data = await response.json()
+            if (!data.isPublished && session?.user?.id !== data.creator.id) {
+                // Check if user has admin access
+                const permissionsResponse = await fetch("/api/permissions/check?permission=admin:access")
+                const permissionsData = await permissionsResponse.json()
+
+                if (!permissionsData.hasPermission) {
+                    throw new Error("You don't have permission to view this event")
+                }
+            }
             setEvent(data)
         } catch (error) {
             setError(error instanceof Error ? error.message : "An error occurred")
         } finally {
             setIsLoading(false)
         }
-    }, [eventId])
-    
+    }, [eventId, session])
+
     useEffect(() => {
         fetchEvent()
     }, [fetchEvent])
 
     const isCreator = session?.user?.id === event?.creator.id
 
+    const handleEditTicketType = (ticketType: TicketType) => {
+        setSelectedTicketType(ticketType)
+        setIsTicketTypeEditModalOpen(true)
+    }
     if (isLoading) {
         return (
             <div className="flex justify-center py-12">
@@ -208,6 +226,15 @@ export default function EventDetailsPage() {
                                 </TabsContent>
 
                                 <TabsContent value="tickets" className="space-y-4 mt-4">
+                                    {isCreator && (
+                                        <div className="flex justify-end mb-4">
+                                            <Button onClick={() => setIsTicketTypeCreateModalOpen(true)}>
+                                                <Plus className="mr-2 h-4 w-4" />
+                                                Add Ticket Type
+                                            </Button>
+                                        </div>
+                                    )}
+
                                     {event.ticketTypes.length === 0 ? (
                                         <p>No tickets available for this event.</p>
                                     ) : (
@@ -215,7 +242,15 @@ export default function EventDetailsPage() {
                                             {event.ticketTypes.map((ticket) => (
                                                 <Card key={ticket.id}>
                                                     <CardHeader className="pb-2">
-                                                        <CardTitle className="text-lg">{ticket.name}</CardTitle>
+                                                        <div className="flex justify-between items-center">
+                                                            <CardTitle className="text-lg">{ticket.name}</CardTitle>
+                                                            {isCreator && (
+                                                                <Button variant="outline" size="sm" onClick={() => handleEditTicketType(ticket)}>
+                                                                    <Edit className="h-4 w-4 mr-2" />
+                                                                    Edit
+                                                                </Button>
+                                                            )}
+                                                        </div>
                                                         {ticket.description && <CardDescription>{ticket.description}</CardDescription>}
                                                     </CardHeader>
                                                     <CardContent className="pb-2">
@@ -330,6 +365,30 @@ export default function EventDetailsPage() {
                 eventId={event.id}
                 eventName={event.name}
                 bookingsCount={event._count.bookings}
+            />
+
+            {/* Edit Ticket Type Modal */}
+            {selectedTicketType && (
+                <TicketTypeEditModal
+                    isOpen={isTicketTypeEditModalOpen}
+                    onClose={() => {
+                        setIsTicketTypeEditModalOpen(false)
+                        setSelectedTicketType(null)
+                        fetchEvent() // Refresh event data after editing
+                    }}
+                    eventId={event.id}
+                    ticketType={selectedTicketType}
+                />
+            )}
+
+            {/* Create Ticket Type Modal */}
+            <TicketTypeCreateModal
+                isOpen={isTicketTypeCreateModalOpen}
+                onClose={() => {
+                    setIsTicketTypeCreateModalOpen(false)
+                    fetchEvent() // Refresh event data after creating
+                }}
+                eventId={event.id}
             />
         </div>
     )

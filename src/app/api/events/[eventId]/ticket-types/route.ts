@@ -7,13 +7,14 @@ import { checkPermission } from "@/lib/auth/permissions"
 const prisma = new PrismaClient()
 
 // Get all ticket types for an event
-export async function GET(request: Request) {
+export async function GET(req: Request) {
   try {
-    const { pathname } = new URL(request.url);
-    const eventId = pathname.split("/").pop();
+    const { pathname } = new URL(req.url)
+    const segments = pathname.split("/")
+    const eventId = segments[segments.length - 2]
 
     if (!eventId) {
-      return NextResponse.json({ error: "Invalid event ID" }, { status: 400 });
+      return NextResponse.json({ error: "Invalid event ID" }, { status: 400 })
     }
 
     const ticketTypes = await prisma.ticketType.findMany({
@@ -29,8 +30,16 @@ export async function GET(request: Request) {
 }
 
 // Create a new ticket type for an event
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
+    const { pathname } = new URL(req.url)
+    const segments = pathname.split("/")
+    const eventId = segments[segments.length - 2]
+
+    if (!eventId) {
+      return NextResponse.json({ error: "Invalid event ID" }, { status: 400 })
+    }
+
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
@@ -43,14 +52,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Forbidden" }, { status: 403 })
     }
 
-    const { pathname } = new URL(request.url);
-    const eventId = pathname.split("/").pop();
-
-    if (!eventId) {
-      return NextResponse.json({ error: "Invalid event ID" }, { status: 400 });
-    }
-
-    const data = await request.json()
+    const data = await req.json()
 
     // Check if event exists and user is the creator
     const event = await prisma.event.findUnique({

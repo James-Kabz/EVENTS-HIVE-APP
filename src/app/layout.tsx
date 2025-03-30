@@ -9,7 +9,7 @@ import { Toaster } from "@/components/ui/sonner"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "Next.js Authentication",
+  title: "Events Hive",
   description: "Next.js Authentication with Next-Auth, Prisma, and shadcn/ui",
 }
 
@@ -24,7 +24,7 @@ export default function RootLayout({
         <AuthProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             {children}
-            <Toaster />
+            <Toaster position="top-right" />
           </ThemeProvider>
         </AuthProvider>
       </body>
