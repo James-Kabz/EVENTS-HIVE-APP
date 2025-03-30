@@ -13,14 +13,42 @@ interface TicketType {
   quantity: string;
 }
 
-// Get all events
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const published = searchParams.get("published")
+    const session = await getServerSession(authOptions)
+    const isAdmin = session?.user?.id ? await checkPermission("admin:access") : false
 
-    // Filter options
-    const where = published === "true" ? { isPublished: true } : published === "false" ? { isPublished: false } : {}
+    // Build the where clause
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let where: any = {}
+
+    // If published parameter is provided, use it
+    if (published === "true") {
+      where.isPublished = true
+    } else if (published === "false") {
+      // Only allow filtering for unpublished events if user is admin or has edit permission
+      if (isAdmin || (session?.user?.id && (await checkPermission("events:edit")))) {
+        where.isPublished = false
+      } else {
+        // Non-admin users should only see published events
+        where.isPublished = true
+      }
+    } else {
+      // If no published parameter, non-admin users should only see published events
+      if (!isAdmin && (!session?.user?.id || !(await checkPermission("events:edit")))) {
+        where.isPublished = true
+      }
+    }
+
+    // If user is logged in, allow them to see their own unpublished events
+    if (session?.user?.id && !isAdmin && !(await checkPermission("events:edit"))) {
+      where = {
+        OR: [{ isPublished: true }, { creatorId: session.user.id }],
+      }
+    }
 
     const events = await prisma.event.findMany({
       where,
@@ -58,6 +86,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ message: "Something went wrong" }, { status: 500 })
   }
 }
+
 
 // Create a new event
 export async function POST(request: Request) {

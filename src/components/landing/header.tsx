@@ -18,12 +18,6 @@ export default function Header() {
           <Link href="#discover" className="text-sm font-medium hover:text-primary">
             Discover
           </Link>
-          <Link href="#how-it-works" className="text-sm font-medium hover:text-primary">
-            How It Works
-          </Link>
-          <Link href="#pricing" className="text-sm font-medium hover:text-primary">
-            Pricing
-          </Link>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -32,7 +26,7 @@ export default function Header() {
               Log in
             </Button>
           </Link>
-          <Link href="/register">
+          <Link href="/login?callbackUrl=/dashboard">
             <Button size="sm">Sign up</Button>
           </Link>
         </div>
