@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
 import crypto from "crypto"
+import { sendEmail, getPasswordResetEmailTemplate } from "@/lib/email/email"
 
 const prisma = new PrismaClient()
 
@@ -39,22 +40,25 @@ export async function POST(request: Request) {
       },
     })
 
-    // In a real application, you would send an email with the reset link
-    // For this example, we'll just return the token
-    // In production, you would use a service like SendGrid, Mailgun, etc.
+    // Create reset URL
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`
 
-    // const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${resetToken}`
-    // await sendEmail({
-    //   to: user.email,
-    //   subject: "Reset your password",
-    //   text: `Click the link to reset your password: ${resetUrl}`,
-    // })
+    // Get email template
+    const { subject, html, text } = getPasswordResetEmailTemplate(user.name || "", resetUrl)
+
+    // Send email
+    await sendEmail({
+      to: user.email || "",
+      subject,
+      html,
+      text,
+    })
 
     return NextResponse.json(
       {
         message: "If an account with that email exists, we've sent a password reset link",
         // Only for development purposes, remove in production
-        resetToken,
+        ...(process.env.NODE_ENV === "development" && { resetToken, resetUrl }),
       },
       { status: 200 },
     )
