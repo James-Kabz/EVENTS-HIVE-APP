@@ -1,21 +1,21 @@
-import { Metadata } from "next"
-import Link from "next/link"
-import { redirect } from "next/navigation"
-import { getServerSession } from "next-auth"
+import { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
 
-import { LoginForm } from "@/components/auth/login-form"
-import { authOptions } from "@/lib/auth/auth"
+import { LoginForm } from "@/components/auth/login-form";
+import { authOptions } from "@/lib/auth/auth";
 
 export const metadata: Metadata = {
   title: "Login",
   description: "Login to your account",
-}
+};
 
 export default async function LoginPage() {
-  const session = await getServerSession(authOptions)
+  const session = await getServerSession(authOptions);
 
   if (session) {
-    redirect("/dashboard")
+    redirect("/dashboard");
   }
 
   return (
@@ -30,6 +30,16 @@ export default async function LoginPage() {
           </p>
         </div>
         <LoginForm />
+        {/* Forgot Password Link */}
+        <p className="text-center text-sm text-muted-foreground">
+          <Link
+            href="/forgot-password"
+            className="hover:text-brand underline underline-offset-4"
+          >
+            Forgot your password?
+          </Link>
+        </p>
+        {/* Register Link */}
         <p className="px-8 text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
           <Link
@@ -41,5 +51,5 @@ export default async function LoginPage() {
         </p>
       </div>
     </div>
-  )
+  );
 }
