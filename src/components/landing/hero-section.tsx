@@ -32,7 +32,7 @@ export default function HeroSection() {
             </div>
           </div>
           <Image
-            src="images/placeholder.svg?height=550&width=550"
+            src="/images/events_hive.png?height=550&width=550"
             width={550}
             height={550}
             alt="Events collage"

@@ -87,7 +87,7 @@ export function EventsList({
             <CardHeader className="p-0">
               <div className="relative h-48 w-full">
                 <Image
-                  src={event.imageUrl || `/placeholder.svg?height=200&width=400`}
+                  src={event.imageUrl || `/events_hive.png?height=200&width=400`}
                   alt={event.name}
                   fill
                   className="object-cover rounded-t-lg"
