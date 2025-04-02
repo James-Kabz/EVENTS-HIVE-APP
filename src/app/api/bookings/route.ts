@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth/auth"
 import { nanoid } from "nanoid"
 import { format } from "date-fns"
-import { sendEmail, generateQRCode, getTicketConfirmationEmailTemplate } from "@/lib/email/email"
+import { sendEmail, generateQRCode, getTicketConfirmationEmailTemplate,generateQRCodeBuffer } from "@/lib/email/email"
 
 const prisma = new PrismaClient()
 
@@ -217,14 +217,15 @@ export async function POST(request: Request) {
     // Send ticket confirmation email
     try {
       // Group tickets by type for the email
-      const ticketsByType = updatedBooking.tickets.reduce((acc, ticket) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const ticketsByType = updatedBooking.tickets.reduce((acc: Map<string, any>, ticket) => {
         const typeName = ticket.ticketType.name
-        if (!acc[typeName]) {
-          acc[typeName] = { name: typeName, quantity: 0 }
+        if (!acc.has(typeName)) {
+          acc.set(typeName, { name: typeName, quantity: 0 })
         }
-        acc[typeName].quantity += 1
+        acc.get(typeName).quantity += 1
         return acc
-      }, {})
+      }, new Map())
 
       // Format event date
       const eventDate = format(new Date(updatedBooking.event.startDate), "EEEE, MMMM d, yyyy 'at' h:mm a")
@@ -237,7 +238,7 @@ export async function POST(request: Request) {
       })
 
       const qrCodeDataUrl = await generateQRCode(qrCodeData)
-
+      const qrCodeBuffer = await generateQRCodeBuffer(qrCodeData)
       // Create ticket download URL
       const ticketUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/bookings/${updatedBooking.id}`
 
@@ -253,11 +254,20 @@ export async function POST(request: Request) {
       )
 
       // Send the email
+      
+      // Send the email with QR code attachment
       await sendEmail({
         to: updatedBooking.email,
         subject,
         html,
         text,
+        attachments: [
+          {
+            filename: "ticket-qrcode.png",
+            content: qrCodeBuffer,
+            contentType: "image/png",
+          },
+        ],
       })
 
       console.log("Ticket confirmation email sent successfully")

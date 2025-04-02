@@ -5,15 +5,20 @@ import { authOptions } from "@/lib/auth/auth"
 
 const prisma = new PrismaClient()
 
-export async function GET(request: Request, { params }: { params: { ticketId: string } }) {
+export async function GET(request: Request) {
   try {
+    const { pathname } = new URL(request.url);
+    const ticketId = pathname.split("/").pop();
+
+    if (!ticketId) {
+      return NextResponse.json({ error: "Invalid event ID" }, { status: 400 });
+    }
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
-    const { ticketId } = params
 
     // Fetch the ticket with related data
     const ticket = await prisma.ticket.findUnique({

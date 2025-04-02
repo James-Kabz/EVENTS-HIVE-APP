@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -31,9 +31,11 @@ interface Ticket {
   }
 }
 
-export default function TicketPage({ params }: { params: { ticketId: string } }) {
+export default function TicketPage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router = useRouter()
+  const params = useParams()
+  const ticketId = params.ticketId
   const [ticket, setTicket] = useState<Ticket | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -41,7 +43,7 @@ export default function TicketPage({ params }: { params: { ticketId: string } })
   useEffect(() => {
     const fetchTicket = async () => {
       try {
-        const response = await fetch(`/api/tickets/${params.ticketId}`)
+        const response = await fetch(`/api/tickets/${ticketId}`)
 
         if (!response.ok) {
           if (response.status === 404) {
@@ -60,10 +62,10 @@ export default function TicketPage({ params }: { params: { ticketId: string } })
     }
 
     fetchTicket()
-  }, [params.ticketId])
+  }, [ticketId])
 
   const handleDownload = () => {
-    window.open(`/api/tickets/${params.ticketId}/download`, "_blank")
+    window.open(`/api/tickets/${ticketId}/download`, "_blank")
   }
 
   const handlePrint = () => {

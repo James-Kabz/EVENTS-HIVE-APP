@@ -50,6 +50,7 @@ export async function generateQRCode(data: string): Promise<string> {
       errorCorrectionLevel: "H",
       margin: 1,
       width: 300,
+      type: "image/png"
     })
   } catch (error) {
     console.error("Error generating QR code:", error)
@@ -141,6 +142,9 @@ export function getTicketConfirmationEmailTemplate(
         <div style="text-align: center; margin: 30px 0;">
           <p>Scan this QR code at the event entrance:</p>
           <img src="${qrCodeDataUrl}" alt="Ticket QR Code" style="max-width: 200px; height: auto;" />
+          <p style="font-size: 12px; color: #666; margin-top: 5px;">
+            (If the QR code is not visible, please view your tickets in the dashboard)
+          </p>
         </div>
         
         <div style="text-align: center; margin: 30px 0;">

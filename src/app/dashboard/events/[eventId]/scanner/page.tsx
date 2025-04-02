@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -38,9 +38,11 @@ interface VerificationResult {
   }
 }
 
-export default function TicketScannerPage({ params }: { params: { eventId: string } }) {
+export default function TicketScannerPage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router = useRouter()
+  const params = useParams()
+  const eventId = params.eventId
   const [event, setEvent] = useState<Event | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -55,7 +57,7 @@ export default function TicketScannerPage({ params }: { params: { eventId: strin
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const response = await fetch(`/api/events/${params.eventId}`)
+        const response = await fetch(`/api/events/${eventId}`)
 
         if (!response.ok) {
           if (response.status === 404) {
@@ -74,7 +76,7 @@ export default function TicketScannerPage({ params }: { params: { eventId: strin
     }
 
     fetchEvent()
-  }, [params.eventId])
+  }, [eventId])
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleScan = async (data: any) => {
@@ -113,7 +115,7 @@ export default function TicketScannerPage({ params }: { params: { eventId: strin
         body: JSON.stringify({
           ticketId,
           ticketNumber: ticketNumber || ticketNumber,
-          eventId: params.eventId,
+          eventId: eventId,
         }),
       })
 
@@ -180,7 +182,7 @@ export default function TicketScannerPage({ params }: { params: { eventId: strin
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <Button variant="outline" asChild>
-          <Link href={`/dashboard/events/${params.eventId}`}>
+          <Link href={`/dashboard/events/${eventId}`}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Event
           </Link>
