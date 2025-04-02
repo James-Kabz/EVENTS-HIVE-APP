@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
-import bcrypt from "bcryptjs"
 import crypto from "crypto"
 import { sendEmail } from "@/lib/email/email"
 import { getEmailVerificationTemplate } from "@/lib/email/email-templates"
@@ -9,31 +8,37 @@ const prisma = new PrismaClient()
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password } = await request.json()
+    const { email } = await request.json()
 
-    // Validate input
-    if (!name || !email || !password) {
-      return NextResponse.json({ message: "Name, email, and password are required" }, { status: 400 })
+    if (!email) {
+      return NextResponse.json({ message: "Email is required" }, { status: 400 })
     }
 
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
+    // Find user by email
+    const user = await prisma.user.findUnique({
       where: { email },
     })
 
-    if (existingUser) {
-      return NextResponse.json({ message: "User with this email already exists" }, { status: 400 })
+    // Don't reveal if user exists for security
+    if (!user) {
+      return NextResponse.json(
+        { message: "If an account with that email exists, we've sent a verification email" },
+        { status: 200 },
+      )
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10)
+    // Check if email is already verified
+    if (user.emailVerified) {
+      return NextResponse.json({ message: "Email is already verified. You can log in." }, { status: 400 })
+    }
 
-    // Generate verification token
+    // Generate new verification token
     const verificationToken = crypto.randomBytes(32).toString("hex")
 
     // Check if token already exists (extremely unlikely but good practice)
     const tokenExists = await prisma.user.findFirst({
       where: { verificationToken },
+      select: { id: true },
     })
 
     if (tokenExists) {
@@ -41,23 +46,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Please try again" }, { status: 500 })
     }
 
-    // Get default guest role
-    const guestRole = await prisma.role.findUnique({
-      where: { name: "guest" },
-    })
-
-    if (!guestRole) {
-      return NextResponse.json({ message: "Default role not found" }, { status: 500 })
-    }
-
-    // Create user
-    const user = await prisma.user.create({
+    // Update user with new token
+    await prisma.user.update({
+      where: { id: user.id },
       data: {
-        name,
-        email,
-        password: hashedPassword,
         verificationToken,
-        roleId: guestRole.id,
       },
     })
 
@@ -77,14 +70,14 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
-        message: "User registered successfully. Please check your email to verify your account.",
+        message: "Verification email sent. Please check your inbox.",
         // Only for development purposes, remove in production
         ...(process.env.NODE_ENV === "development" && { verificationUrl }),
       },
-      { status: 201 },
+      { status: 200 },
     )
   } catch (error) {
-    console.error("Registration error:", error)
+    console.error("Resend verification error:", error)
     return NextResponse.json({ message: "Something went wrong" }, { status: 500 })
   }
 }

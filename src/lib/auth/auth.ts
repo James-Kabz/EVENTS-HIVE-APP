@@ -34,6 +34,11 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
+        // Check if email is verified for credential login
+        if (!user.emailVerified) {
+          throw new Error("Please verify your email before logging in")
+        }
+
         const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
 
         if (!isPasswordValid) {
@@ -78,6 +83,14 @@ export const authOptions: NextAuthOptions = {
               })
             }
           }
+          
+          // For Google sign-ins, automatically mark email as verified
+          if (existingUser && !existingUser.emailVerified) {
+            await prisma.user.update({
+              where: { id: existingUser.id },
+              data: { emailVerified: new Date() },
+            })
+          }
         } catch (error) {
           console.error("Error assigning guest role:", error)
         }
@@ -119,6 +132,7 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/login",
     newUser: "/register",
+    error: "/login"
   },
   session: {
     strategy: "jwt",
@@ -171,3 +185,6 @@ async function createGuestRole() {
   }
 }
 
+// For compatibility with both import styles
+import NextAuth from "next-auth"
+export const { auth, signIn, signOut } = NextAuth(authOptions)
