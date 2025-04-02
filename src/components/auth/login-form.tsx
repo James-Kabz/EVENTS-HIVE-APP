@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 
+// Move schema outside component to prevent re-creation on rerenders
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(1, { message: "Password is required" }),
@@ -34,7 +35,8 @@ export function LoginForm() {
     },
   })
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  // Using useCallback to prevent recreating the function on each render
+  const onSubmit = useCallback(async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true)
     setError(null)
 
@@ -59,7 +61,7 @@ export function LoginForm() {
         router.push(callbackUrl)
       }
     } catch (error) {
-      console.log(error);
+      console.error("Login error:", error);
       setError("An error occurred during login")
       toast.error("Login failed", {
         description: "An unexpected error occurred",
@@ -67,7 +69,25 @@ export function LoginForm() {
     } finally {
       setIsSubmitting(false)
     }
-  }
+  }, [router, callbackUrl])
+
+  // Separate the error display into its own memoized component
+  const ErrorDisplay = useCallback(() => {
+    if (!error) return null;
+    
+    return (
+      <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-800 text-sm mb-4">
+        {error}
+        {error.includes("verify your email") && (
+          <div className="mt-2">
+            <Link href="/resend-verification" className="text-red-800 font-medium hover:underline">
+              Resend verification email
+            </Link>
+          </div>
+        )}
+      </div>
+    );
+  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-12">
@@ -77,18 +97,7 @@ export function LoginForm() {
           <CardDescription>Enter your credentials to access your account</CardDescription>
         </CardHeader>
         <CardContent>
-          {error && (
-            <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-800 text-sm mb-4">
-              {error}
-              {error.includes("verify your email") && (
-                <div className="mt-2">
-                  <Link href="/resend-verification" className="text-red-800 font-medium hover:underline">
-                    Resend verification email
-                  </Link>
-                </div>
-              )}
-            </div>
-          )}
+          <ErrorDisplay />
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -148,4 +157,3 @@ export function LoginForm() {
     </div>
   )
 }
-

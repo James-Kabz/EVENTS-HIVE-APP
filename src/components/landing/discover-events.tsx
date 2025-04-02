@@ -45,27 +45,27 @@ export default function DiscoverEvents() {
   }, [])
 
   return (
-    <section id="discover" className="w-full py-12 md:py-24 lg:py-32">
+    <section id="discover" className="w-full py-8 md:py-16 lg:py-24">
       <div className="container max-w-7xl mx-auto px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <div className="space-y-2">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Popular Events</h2>
-            <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+            <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl lg:text-5xl">Popular Events</h2>
+            <p className="max-w-[900px] text-sm text-muted-foreground md:text-base lg:text-xl">
               Explore trending events happening around you.
             </p>
           </div>
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-12">
+          <div className="flex justify-center py-8 md:py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : events.length === 0 ? (
-          <div className="text-center py-12">
+          <div className="text-center py-8 md:py-12">
             <p className="text-muted-foreground">No upcoming events available at the moment. Check back soon!</p>
           </div>
         ) : (
-          <div className="mx-auto grid min-w-7xl gap-6 py-12 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mx-auto grid gap-4 sm:gap-6 py-8 md:py-12 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {events.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
@@ -87,34 +87,45 @@ function EventCard({ event }: { event: Event }) {
   const lowestPrice = event.ticketTypes.length > 0 ? Math.min(...event.ticketTypes.map((ticket) => ticket.price)) : null
 
   return (
-    <div className="group relative overflow-hidden rounded-lg border">
-      <div className="aspect-video overflow-hidden">
-        <Image
-          src={event.imageUrl || `/placeholder.svg?height=300&width=400&text=${encodeURIComponent(event.name)}`}
-          width={400}
-          height={300}
-          alt={event.name}
-          className="object-cover transition-transform group-hover:scale-105"
-        />
-      </div>
-      <div className="p-4">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Calendar className="h-4 w-4" />
-          <span>{format(new Date(event.startDate), "MMM d, yyyy")}</span>
-          <MapPin className="ml-2 h-4 w-4" />
-          <span className="truncate">{event.location}</span>
+    <div className="group relative overflow-hidden rounded-lg border bg-background hover:shadow-md transition-all duration-300 flex flex-col h-full">
+      <div className="aspect-video w-full overflow-hidden">
+        <div className="relative h-40 sm:h-48 md:h-52 w-full">
+          <Image
+            src={event.imageUrl || `/events_hive.png?height=300&width=400&text=${encodeURIComponent(event.name)}`}
+            alt={event.name}
+            fill
+            className="object-cover transition-transform group-hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+            priority={false}
+          />
         </div>
-        <h3 className="mt-2 text-lg font-bold">{event.name}</h3>
-        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+      </div>
+      
+      <div className="p-3 sm:p-4 flex flex-col flex-grow">
+        <div className="flex flex-col xs:flex-row xs:items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span>{format(new Date(event.startDate), "MMM d, yyyy")}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span className="truncate max-w-[150px]">{event.location}</span>
+          </div>
+        </div>
+        
+        <h3 className="mt-2 text-base sm:text-lg font-bold line-clamp-1">{event.name}</h3>
+        
+        <p className="mt-1 line-clamp-2 text-xs sm:text-sm text-muted-foreground flex-grow">
           {event.description || "No description available."}
         </p>
-        <div className="mt-4 flex items-center justify-between">
+        
+        <div className="mt-3 sm:mt-4 flex items-center justify-between">
           {lowestPrice !== null ? (
-            <span className="font-medium">Kshs {lowestPrice.toFixed(2)}</span>
+            <span className="font-medium text-sm sm:text-base">Kshs {lowestPrice.toFixed(2)}</span>
           ) : (
-            <span className="text-muted-foreground">Free</span>
+            <span className="text-xs sm:text-sm text-muted-foreground">Free</span>
           )}
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" size="sm" className="h-8 text-xs sm:text-sm px-2 sm:px-3" asChild>
             <Link href={`/dashboard/events/${event.id}`}>View Details</Link>
           </Button>
         </div>
@@ -122,4 +133,3 @@ function EventCard({ event }: { event: Event }) {
     </div>
   )
 }
-

@@ -12,8 +12,28 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata = {
   title: "Events Hive",
   description: "Next.js Authentication with Next-Auth, Prisma, and shadcn/ui",
+  metadataBase: new URL('https://events-hive-app.vercel.app'),
+  icons: {
+    icon: '/events_hive.png',
+  },
+  // Add this section for font preloading
+  openGraph: {
+    // Your OpenGraph metadata
+  },
+  // Add links array for preloading resources
+  other: {
+    'link': [
+      {
+        rel: 'preload',
+        href: '/fonts/your-custom-font.woff2',
+        as: 'font',
+        type: 'font/woff2',
+        crossOrigin: 'anonymous',
+      }
+    ],
+  },
 }
-
+ 
 export default function RootLayout({
   children,
 }: {
@@ -34,4 +54,3 @@ export default function RootLayout({
     </html>
   )
 }
-

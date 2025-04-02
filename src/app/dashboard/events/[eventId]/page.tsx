@@ -158,7 +158,7 @@ export default function EventDetailsPage() {
                     <Card>
                         <div className="relative h-64 w-full">
                             <Image
-                                src={event.imageUrl || `/placeholder.svg?height=200&width=400`}
+                                src={event.imageUrl || `events_hive.png?height=200&width=400`}
                                 alt={event.name}
                                 fill
                                 className="object-cover rounded-t-lg"
