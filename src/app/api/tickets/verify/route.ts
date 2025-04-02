@@ -23,16 +23,28 @@ export async function POST(request: Request) {
 
     const data = await request.json()
 
-    // Validate required fields
-    if (!data.ticketId && !data.ticketNumber) {
-      return NextResponse.json({ message: "Ticket ID or ticket number is required" }, { status: 400 })
+    // Validate required fields - at least one of ticketId or ticketNumber must be provided and non-empty
+    if ((!data.ticketId || data.ticketId.trim() === "") && (!data.ticketNumber || data.ticketNumber.trim() === "")) {
+      return NextResponse.json({ message: "Valid ticket ID or ticket number is required" }, { status: 400 })
+    }
+
+    // Build the where clause for the query
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const whereClause: any = { OR: [] }
+
+    // Only add ticketId to the query if it's a valid non-empty string
+    if (data.ticketId && data.ticketId.trim() !== "") {
+      whereClause.OR.push({ id: data.ticketId.trim() })
+    }
+
+    // Only add ticketNumber to the query if it's a valid non-empty string
+    if (data.ticketNumber && data.ticketNumber.trim() !== "") {
+      whereClause.OR.push({ ticketNumber: data.ticketNumber.trim() })
     }
 
     // Find the ticket
     const ticket = await prisma.ticket.findFirst({
-      where: {
-        OR: [{ id: data.ticketId || "" }, { ticketNumber: data.ticketNumber || "" }],
-      },
+      where: whereClause,
       include: {
         booking: {
           select: {
