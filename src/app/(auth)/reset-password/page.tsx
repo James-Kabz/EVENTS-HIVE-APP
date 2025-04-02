@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -25,17 +25,24 @@ const formSchema = z
 
 export default function ResetPasswordPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const token = searchParams.get("token")
+  const [token, setToken] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isValidToken, setIsValidToken] = useState(true)
 
+  // Extract token safely inside useEffect
   useEffect(() => {
-    if (!token) {
-      setIsValidToken(false)
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search)
+      const resetToken = urlParams.get("token")
+
+      if (resetToken) {
+        setToken(resetToken)
+      } else {
+        setIsValidToken(false)
+      }
     }
-  }, [token])
+  }, [])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -75,7 +82,7 @@ export default function ResetPasswordPage() {
 
       // Redirect to login after 3 seconds
       setTimeout(() => {
-        router.push("/api/auth/signin")
+        router.push("/login")
       }, 3000)
     } catch (error) {
       toast.error("Error", {
@@ -98,7 +105,7 @@ export default function ResetPasswordPage() {
             <div className="text-center">
               <p className="mb-4">Please request a new password reset link.</p>
               <Button asChild>
-                <Link href="/auth/forgot-password">Request New Link</Link>
+                <Link href="/forgot-password">Request New Link</Link>
               </Button>
             </div>
           </CardContent>
@@ -179,7 +186,7 @@ export default function ResetPasswordPage() {
         </CardContent>
         <CardFooter>
           <div className="text-center w-full text-sm">
-            <Link href="/api/auth/signin" className="text-primary hover:underline">
+            <Link href="/login" className="text-primary hover:underline">
               Back to login
             </Link>
           </div>
@@ -188,4 +195,3 @@ export default function ResetPasswordPage() {
     </div>
   )
 }
-
