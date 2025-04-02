@@ -20,9 +20,10 @@ model User {
   roleId          String?   @db.ObjectId
   resetToken      String?
   resetTokenExpiry DateTime?
+  verificationToken String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
-  
+
   // Event relations
   createdEvents   Event[]   @relation("EventCreator")
   bookings        Booking[] @relation("UserBookings")
@@ -158,13 +159,13 @@ model Ticket {
   id          String    @id @default(auto()) @map("_id") @db.ObjectId
   ticketNumber String   @unique
   usedAt      DateTime?
-  
+
   // Relations
   booking     Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   bookingId   String    @db.ObjectId
   ticketType  TicketType @relation(fields: [ticketTypeId], references: [id])
   ticketTypeId String    @db.ObjectId
-  
+
   // Timestamps
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
