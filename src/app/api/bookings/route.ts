@@ -3,6 +3,8 @@ import { PrismaClient } from "@prisma/client"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth/auth"
 import { nanoid } from "nanoid"
+import { format } from "date-fns"
+import { sendEmail, generateQRCode, getTicketConfirmationEmailTemplate,generateQRCodeBuffer } from "@/lib/email/email"
 
 const prisma = new PrismaClient()
 
@@ -18,7 +20,6 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
 
-    
     if (!session?.user?.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
@@ -155,15 +156,17 @@ export async function POST(request: Request) {
       })
 
       // 2. Create tickets for the booking
+      const createdTickets = []
       for (const item of ticketItems) {
         for (let i = 0; i < item.quantity; i++) {
-          await tx.ticket.create({
+          const ticket = await tx.ticket.create({
             data: {
               ticketNumber: `TKT-${nanoid(8)}`,
               bookingId: newBooking.id,
               ticketTypeId: item.ticketTypeId,
             },
           })
+          createdTickets.push(ticket)
         }
 
         // 3. Update remaining tickets for each ticket type
@@ -177,13 +180,13 @@ export async function POST(request: Request) {
         })
       }
 
-      return newBooking
+      return { newBooking, createdTickets }
     })
 
     // In a real app, you would initiate payment here
     // For demo purposes, we'll simulate a successful payment
     const updatedBooking = await prisma.booking.update({
-      where: { id: booking.id },
+      where: { id: booking.newBooking.id },
       data: {
         status: "CONFIRMED",
         paymentId: `PAY-${nanoid(10)}`,
@@ -198,11 +201,80 @@ export async function POST(request: Request) {
           select: {
             name: true,
             startDate: true,
+            endDate: true,
             location: true,
+          },
+        },
+        user: {
+          select: {
+            name: true,
+            email: true,
           },
         },
       },
     })
+
+    // Send ticket confirmation email
+    try {
+      // Group tickets by type for the email
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const ticketsByType = updatedBooking.tickets.reduce((acc: Map<string, any>, ticket) => {
+        const typeName = ticket.ticketType.name
+        if (!acc.has(typeName)) {
+          acc.set(typeName, { name: typeName, quantity: 0 })
+        }
+        acc.get(typeName).quantity += 1
+        return acc
+      }, new Map())
+
+      // Format event date
+      const eventDate = format(new Date(updatedBooking.event.startDate), "EEEE, MMMM d, yyyy 'at' h:mm a")
+
+      // Generate QR code for the booking
+      const qrCodeData = JSON.stringify({
+        bookingId: updatedBooking.id,
+        eventId: data.eventId,
+        userId: session.user.id,
+      })
+
+      const qrCodeDataUrl = await generateQRCode(qrCodeData)
+      const qrCodeBuffer = await generateQRCodeBuffer(qrCodeData)
+      // Create ticket download URL
+      const ticketUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/bookings/${updatedBooking.id}`
+
+      // Get email template
+      const { subject, html, text } = getTicketConfirmationEmailTemplate(
+        updatedBooking.user.name || updatedBooking.name,
+        updatedBooking.event.name,
+        eventDate,
+        updatedBooking.event.location,
+        Object.values(ticketsByType),
+        qrCodeDataUrl,
+        ticketUrl,
+      )
+
+      // Send the email
+      
+      // Send the email with QR code attachment
+      await sendEmail({
+        to: updatedBooking.email,
+        subject,
+        html,
+        text,
+        attachments: [
+          {
+            filename: "ticket-qrcode.png",
+            content: qrCodeBuffer,
+            contentType: "image/png",
+          },
+        ],
+      })
+
+      console.log("Ticket confirmation email sent successfully")
+    } catch (emailError) {
+      console.error("Error sending ticket confirmation email:", emailError)
+      // Don't fail the booking if email fails
+    }
 
     return NextResponse.json(
       {

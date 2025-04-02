@@ -139,6 +139,12 @@ export default function EventDetailsPage() {
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Event
                         </Button>
+                        <Button variant="outline" asChild>
+                        <Link href={`/dashboard/events/${event.id}/scanner`}>
+                            <Ticket className="mr-2 h-4 w-4" />
+                            Scan Tickets
+                        </Link>
+                        </Button>
                         <Button variant="destructive" onClick={() => setIsDeleteModalOpen(true)}>
                             <Trash className="mr-2 h-4 w-4" />
                             Delete

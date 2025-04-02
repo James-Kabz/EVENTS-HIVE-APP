@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Loader2, Calendar, Clock, MapPin, ArrowLeft, XCircle, Printer, Download } from 'lucide-react'
+import { Loader2, Calendar, Clock, MapPin, ArrowLeft, XCircle, Printer, Download, Ticket } from 'lucide-react'
 import Link from "next/link"
 import {
   AlertDialog,
@@ -245,8 +245,22 @@ export default function BookingDetailsPage() {
                             <h4 className="font-medium">{ticket.ticketType.name}</h4>
                             <p className="text-sm text-muted-foreground">Ticket #{ticket.ticketNumber}</p>
                           </div>
-                          <div className="text-right">
-                            <p className="font-medium">Kshs {ticket.ticketType.price.toFixed(2)}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">${ticket.ticketType.price.toFixed(2)}</p>
+                            <Button variant="outline" size="sm" asChild>
+                              <Link href={`/dashboard/tickets/${ticket.id}`}>
+                                <Ticket className="mr-2 h-4 w-4" />
+                                View Ticket
+                              </Link>
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(`/api/tickets/${ticket.id}/download`, "_blank")}
+                            >
+                              <Download className="mr-2 h-4 w-4" />
+                              Download
+                            </Button>
                           </div>
                         </div>
                       </CardContent>
