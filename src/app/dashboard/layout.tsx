@@ -2,7 +2,7 @@ import type React from "react"
 import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { SpeedInsights } from '@vercel/speed-insights/next';
-
+import { Analytics } from "@vercel/analytics/react"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { DashboardSidebar } from "@/components/dashboard/sidebar"
 import { DashboardHeader } from "@/components/dashboard/header"
@@ -30,6 +30,7 @@ export default async function DashboardLayout({
           {user && <DashboardHeader user={user} />}
           <main className="flex-1 p-2">{children}</main>
           <SpeedInsights/>
+          <Analytics/>
         </div>
       </div>
     </SidebarProvider>
